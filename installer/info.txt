@@ -1,0 +1,37 @@
+O que este instalador vai fazer no seu computador
+==================================================
+
+1. Copiar o Sensoryx para a pasta de instalação (por padrão, Arquivos de Programas\Sensoryx).
+
+2. Instalar o driver PawnIO, SE ele ainda não estiver instalado.
+   - O PawnIO é um driver de kernel assinado, de código aberto (GPL-2.0), que permite ler a
+     temperatura da CPU. O Sensoryx precisa dele para essa leitura.
+   - O instalador oficial do PawnIO (v2.2.0) é BAIXADO da internet a partir de
+     https://github.com/namazso/PawnIO.Setup e só é executado se o hash SHA-256 conferir.
+   - Este é o único acesso à internet do instalador. O Sensoryx em si não envia nenhuma
+     informação para a rede.
+   - O driver NÃO é removido ao desinstalar o Sensoryx, pois outros programas podem usá-lo.
+     Para removê-lo, desinstale "PawnIO" em Configurações > Aplicativos.
+
+3. (Opcional, você escolhe na próxima tela) Criar uma tarefa agendada para iniciar o Sensoryx
+   com o Windows. O Sensoryx precisa rodar como administrador para falar com o driver e medir o
+   FPS; a tarefa agendada evita um pedido de permissão a cada login.
+
+4. As configurações ficam em %APPDATA%\Sensoryx\settings.ini. A tela de configurações usa o
+   Microsoft Edge WebView2 Runtime, que já acompanha o Windows 11 (o instalador avisa se faltar).
+
+5. Atualizações: o Sensoryx só acessa a internet se você usar "Verificar agora" na tela de
+   configurações (ou ativar a verificação ao abrir a tela). Nada é enviado além do pedido ao GitHub.
+
+O que a desinstalação remove: os arquivos do Sensoryx e a tarefa agendada. Suas configurações em
+%APPDATA%\Sensoryx são mantidas.
+
+---------------------------------------------------------------------------------------------
+
+What this installer does
+------------------------
+1. Copies Sensoryx to the install folder.
+2. Installs the PawnIO kernel driver if missing (downloaded from the official GitHub release and
+   verified by SHA-256 before running; kept on uninstall because other programs may use it).
+3. Optionally creates a scheduled task to start Sensoryx at logon (it runs as administrator).
+Sensoryx itself does not send any information over the network.

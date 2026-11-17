@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sensoryx</title>
+<style>
+:root{
+  --bg:#0e0f14; --side:#12131a; --card:#171924; --card2:#1d2030; --line:rgba(255,255,255,.07);
+  --text:#f1f2f7; --muted:#8e93a6; --accent:#5aa9ff; --accent2:#8b7bff; --good:#5be584; --warn:#ffc24d; --bad:#ff6b6b;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f2f3f8; --side:#e8eaf2; --card:#ffffff; --card2:#f3f4fa; --line:rgba(0,0,0,.08);
+    --text:#14151c; --muted:#666b80; --shadow:0 10px 30px rgba(20,25,60,.10); color-scheme:light; }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);
+  font-size:14px;overflow:hidden;user-select:none;-webkit-font-smoothing:antialiased}
+.app{display:flex;height:100vh}
+aside{width:228px;background:var(--side);border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;align-items:center;gap:11px;padding:2px 10px 20px}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:grid;place-items:center;box-shadow:0 6px 18px rgba(90,169,255,.35)}
+.logo svg{width:19px;height:19px;stroke:#fff}
+.brand b{font-size:17px;letter-spacing:.2px;font-family:"Segoe UI Variable Display","Segoe UI",sans-serif}
+.brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+nav button{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;
+  color:var(--muted);cursor:pointer;transition:.15s;font-weight:500}
+nav button svg{width:18px;height:18px;flex:none;stroke:currentColor}
+nav button:hover{background:var(--card2);color:var(--text)}
+nav button.on{background:linear-gradient(135deg,rgba(90,169,255,.18),rgba(139,123,255,.16));color:var(--text);
+  box-shadow:inset 0 0 0 1px rgba(90,169,255,.28)}
+nav button.on svg{stroke:var(--accent)}
+.spacer{flex:1}
+.ver{color:var(--muted);font-size:11.5px;padding:8px 12px}
+main{flex:1;overflow-y:auto;padding:30px 34px 40px}
+main::-webkit-scrollbar{width:10px}main::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:3px solid transparent;background-clip:padding-box}
+section{display:none;animation:in .22s ease}
+section.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h1{font-size:25px;font-weight:650;margin-bottom:4px;font-family:"Segoe UI Variable Display","Segoe UI",sans-serif}
+.sub{color:var(--muted);margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card h2{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;padding:14px 0 4px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid var(--line)}
+.card h2+.row,.card>.row:first-child{border-top:0}
+.row .t{font-weight:550}.row .d{color:var(--muted);font-size:12.5px;margin-top:3px;max-width:440px;line-height:1.4}
+.ctl{display:flex;align-items:center;gap:12px;flex:none}
+/* interruptor */
+.sw{position:relative;width:44px;height:25px;flex:none;cursor:pointer}
+.sw input{display:none}
+.sw span{position:absolute;inset:0;border-radius:99px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line);transition:.2s}
+.sw span::after{content:"";position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.35);transition:.2s cubic-bezier(.3,1.4,.5,1)}
+.sw input:checked+span{background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:none}
+.sw input:checked+span::after{transform:translateX(19px)}
+/* segmentado */
+.seg{display:inline-flex;background:var(--card2);border-radius:10px;padding:3px;box-shadow:inset 0 0 0 1px var(--line)}
+.seg button{all:unset;cursor:pointer;padding:6px 16px;border-radius:8px;color:var(--muted);font-weight:550;transition:.15s}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.25),inset 0 0 0 1px var(--line)}
+/* slider */
+.rng{display:flex;align-items:center;gap:14px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:200px;height:6px;border-radius:9px;outline:0;cursor:pointer;
+  background:linear-gradient(90deg,var(--accent),var(--accent2)) 0/var(--p,50%) 100% no-repeat,var(--card2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.4);border:0}
+.pill{min-width:54px;text-align:center;padding:4px 10px;border-radius:8px;background:var(--card2);font-variant-numeric:tabular-nums;
+  box-shadow:inset 0 0 0 1px var(--line);font-weight:600}
+/* atalho */
+kbd{display:inline-block;padding:4px 9px;border-radius:7px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line),0 2px 0 var(--line);
+  font:600 12.5px "Segoe UI Variable Text","Segoe UI",sans-serif}
+.hk{all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:11px;background:var(--card2);
+  box-shadow:inset 0 0 0 1px var(--line);transition:.15s;min-height:38px}
+.hk:hover{box-shadow:inset 0 0 0 1px var(--accent)}
+.hk.rec{box-shadow:inset 0 0 0 2px var(--accent);color:var(--accent);animation:pulse 1.1s infinite}
+@keyframes pulse{50%{opacity:.55}}
+.err{color:var(--bad);font-size:12px;margin-top:6px;height:15px}
+/* botões */
+.btn{all:unset;cursor:pointer;padding:9px 18px;border-radius:10px;font-weight:600;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line);transition:.15s}
+.btn:hover{box-shadow:inset 0 0 0 1px var(--accent)}
+.btn.pri{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 18px rgba(90,169,255,.3)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+/* pré-visualização */
+.stage{position:relative;height:330px;border-radius:14px;overflow:hidden;margin:14px 0 8px;
+  background:radial-gradient(120% 90% at 78% 12%,#3d5a8a 0,#243252 38%,#121828 78%),#121828;box-shadow:inset 0 0 0 1px var(--line)}
+.stage::before{content:"";position:absolute;inset:0;background:
+  linear-gradient(180deg,transparent 55%,rgba(0,0,0,.5)),
+  repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 22px)}
+.stage .hint{position:absolute;right:12px;bottom:10px;color:rgba(255,255,255,.45);font-size:11px;z-index:2}
+.pv{position:absolute;width:268px;padding:18px;border-radius:18px;color:#f3f4f8;z-index:1;
+  background:linear-gradient(180deg,#1d1d28,#101016);box-shadow:0 0 0 1px rgba(255,255,255,.13),0 20px 40px rgba(0,0,0,.45);
+  transform-origin:top left;transition:left .25s,top .25s,transform .25s,opacity .2s;font-size:13px}
+.pv .hero{display:flex;align-items:baseline;justify-content:space-between}
+.pv .big{font:700 46px/1 "Segoe UI Variable Display","Segoe UI";letter-spacing:-.5px}
+.pv .u{color:#5be584;font-size:12px;margin-left:6px;font-weight:600}
+.pv .m{color:#8e93a6;font-size:12px}.pv .m b{color:#f3f4f8;font-size:16px;font-weight:600}
+.pv svg.sp{width:100%;height:34px;margin:12px 0 4px;display:block}
+.pv .sec{border-top:1px solid rgba(255,255,255,.08);padding-top:14px;margin-top:12px}
+.pv .hd{display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:15px}
+.pv .hd i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}
+.pv .bar{height:6px;border-radius:9px;background:rgba(255,255,255,.09);margin:12px 0}
+.pv .bar b{display:block;height:100%;border-radius:9px}
+.pv .g{display:grid;grid-template-columns:1fr 1fr;gap:10px 0}
+.pv .g small{display:block;color:#8e93a6;font-size:10.5px;letter-spacing:.3px}
+.pv .g span{font-weight:600;font-size:17px}.pv .g em{font-style:normal;color:#8e93a6;font-size:12px;font-weight:500;margin-left:3px}
+.corners{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:96px;height:62px;padding:6px;border-radius:10px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line)}
+.corners button{all:unset;cursor:pointer;border-radius:6px;background:var(--line);transition:.15s}
+.corners button:hover{background:rgba(90,169,255,.35)}
+.corners button.on{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+/* atualização */
+.upd{display:flex;align-items:center;gap:16px;padding:18px 0}
+.badge{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line)}
+.badge svg{width:24px;height:24px;stroke:var(--muted)}
+.badge.ok svg{stroke:var(--good)}.badge.new svg{stroke:var(--accent)}.badge.err svg{stroke:var(--bad)}
+.prog{height:8px;border-radius:9px;background:var(--card2);overflow:hidden;margin:6px 0 16px;display:none}
+.prog b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
+.notes{white-space:pre-wrap;color:var(--muted);font-size:12.5px;line-height:1.55;padding:2px 0 16px;max-height:170px;overflow:auto;user-select:text}
+a{color:var(--accent);text-decoration:none;cursor:pointer}a:hover{text-decoration:underline}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:9px 14px;padding:14px 0;color:var(--muted)}.kv b{color:var(--text);font-weight:550;user-select:text}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
+    <div><b>Sensoryx</b><small>Monitor de hardware</small></div>
+  </div>
+  <nav>
+    <button class="on" data-tab="general"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Geral</button>
+    <button data-tab="bar"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 20h18M14 12h4"/></svg>Barra de tarefas</button>
+    <button data-tab="panel"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 9h4M7 13h7"/></svg>Painel no jogo</button>
+    <button data-tab="update"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10m0 0-4-4m4 4 4-4M5 19h14"/></svg>Atualizações</button>
+    <button data-tab="about"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></svg>Sobre</button>
+  </nav>
+  <div class="spacer"></div>
+  <div class="ver" id="verSide"></div>
+</aside>
+<main>
+
+<section id="general" class="on">
+  <h1>Geral</h1><p class="sub">Comportamento básico do Sensoryx.</p>
+  <div class="card">
+    <div class="row"><div><div class="t">Iniciar com o Windows</div><div class="d">Abre o Sensoryx no login, sem pedir permissão de administrador de novo.</div></div>
+      <label class="sw"><input type="checkbox" id="autostart"><span></span></label></div>
+    <div class="row"><div><div class="t">Unidade de temperatura</div><div class="d">Vale para a barra de tarefas e para o painel no jogo.</div></div>
+      <div class="seg" data-k="fahrenheit"><button data-v="false">°C</button><button data-v="true">°F</button></div></div>
+  </div>
+</section>
+
+<section id="bar">
+  <h1>Barra de tarefas</h1><p class="sub">Escolha o que aparece ao lado da bandeja do sistema.</p>
+  <div class="card">
+    <div class="row"><div><div class="t">Temperatura da CPU</div></div><label class="sw"><input type="checkbox" data-k="bar_cpu"><span></span></label></div>
+    <div class="row"><div><div class="t">Temperatura da GPU</div></div><label class="sw"><input type="checkbox" data-k="bar_gpu"><span></span></label></div>
+    <div class="row"><div><div class="t">FPS</div><div class="d">FPS do aplicativo em primeiro plano.</div></div><label class="sw"><input type="checkbox" data-k="bar_fps"><span></span></label></div>
+    <div class="row"><div><div class="t">Bateria dos periféricos</div><div class="d">Mouse, teclado e headset compatíveis.</div></div><label class="sw"><input type="checkbox" data-k="bar_devices"><span></span></label></div>
+  </div>
+</section>
+
+<section id="panel">
+  <h1>Painel no jogo</h1><p class="sub">Um cartão por cima do jogo, que você mostra e oculta com um atalho. Funciona em tela cheia sem bordas.</p>
+  <div class="card">
+    <div class="stage" id="stage"><div class="hint">Pré-visualização</div><div class="pv" id="pv"></div></div>
+    <div class="row"><div><div class="t">Atalho</div><div class="d">Mostra e oculta o painel, mesmo com o jogo em foco. Use ao menos um modificador (Ctrl, Alt, Shift ou Win).</div><div class="err" id="hkErr"></div></div>
+      <div class="ctl"><button class="hk" id="hk"></button></div></div>
+    <div class="row"><div><div class="t">Posição</div><div class="d">Canto da tela onde o painel aparece.</div></div>
+      <div class="corners" data-k="overlay_corner"><button data-v="top-left"></button><button data-v="top-right"></button><button data-v="bottom-left"></button><button data-v="bottom-right"></button></div></div>
+    <div class="row"><div><div class="t">Tamanho</div></div><div class="rng"><input type="range" min="50" max="200" step="5" data-k="overlay_scale"><span class="pill" data-o="overlay_scale"></span></div></div>
+    <div class="row"><div><div class="t">Opacidade do fundo</div><div class="d">Mais opaco facilita a leitura sobre cenas claras.</div></div><div class="rng"><input type="range" min="30" max="100" step="5" data-k="overlay_opacity"><span class="pill" data-o="overlay_opacity"></span></div></div>
+  </div>
+  <div class="card">
+    <h2>Conteúdo</h2>
+    <div class="row"><div><div class="t">Gráfico de FPS</div></div><label class="sw"><input type="checkbox" data-k="panel_graph"><span></span></label></div>
+    <div class="row"><div><div class="t">GPU</div></div><label class="sw"><input type="checkbox" data-k="panel_gpu"><span></span></label></div>
+    <div class="row"><div><div class="t">CPU e memória</div></div><label class="sw"><input type="checkbox" data-k="panel_cpu"><span></span></label></div>
+    <div class="row"><div><div class="t">Periféricos</div></div><label class="sw"><input type="checkbox" data-k="panel_devices"><span></span></label></div>
+  </div>
+</section>
+
+<section id="update">
+  <h1>Atualizações</h1><p class="sub">Baixe novas versões do Sensoryx com verificação de integridade.</p>
+  <div class="card">
+    <div class="upd"><div class="badge" id="ubadge"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="uicon"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></div>
+      <div style="flex:1"><div class="t" id="utitle" style="font-size:16px;font-weight:600">Versão <span class="cv"></span></div><div class="d" id="usub" style="color:var(--muted);margin-top:3px">Clique em "Verificar agora" para procurar uma nova versão.</div></div>
+      <button class="btn" id="ucheck">Verificar agora</button><button class="btn pri" id="uinstall" style="display:none">Atualizar</button></div>
+    <div class="prog" id="uprog"><b></b></div>
+    <div class="notes" id="unotes" style="display:none"></div>
+  </div>
+  <div class="card">
+    <div class="row"><div><div class="t">Verificar ao abrir esta tela</div><div class="d">É a única vez que o Sensoryx acessa a internet: uma consulta ao GitHub para ver se há versão nova. Desligado por padrão.</div></div>
+      <label class="sw"><input type="checkbox" data-k="check_updates"><span></span></label></div>
+  </div>
+</section>
+
+<section id="about">
+  <h1>Sobre</h1><p class="sub">Leve, em Rust, sem telemetria.</p>
+  <div class="card"><div class="kv">
+    <span>Versão</span><b class="cv"></b>
+    <span>Licença</span><b>MIT — PEDROTX SERVICES</b>
+    <span>Privacidade</span><b>Nenhuma informação sai do seu computador, exceto a consulta de atualização se você ativá-la.</b>
+    <span>Driver</span><b>PawnIO (GPL-2.0) para ler a temperatura da CPU</b>
+    <span>Componentes</span><b>Veja THIRD_PARTY_NOTICES.md na pasta de instalação</b>
+  </div></div>
+</section>
+
+</main>
+</div>
+<script>
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const post=m=>window.ipc&&window.ipc.postMessage(m);
+addEventListener('error',e=>post('jserr:'+e.message+' @'+e.lineno+':'+e.colno));
+addEventListener('unhandledrejection',e=>post('jserr:promise '+(e.reason&&e.reason.message||e.reason)));
+let S={}, ENV={version:'0.0.0',repo:'',autostart:false};
+
+/* abas */
+$$('nav button').forEach(b=>b.onclick=()=>{$$('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  $$('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.tab));
+  if(b.dataset.tab==='update'&&S.check_updates&&!checked){checkUpdate()}});
+
+/* grava uma chave */
+function setKey(k,v){S[k]=v;post('set:'+k+'='+v);sync()}
+
+/* sincroniza controles + pré-visualização */
+function sync(){
+  $$('[data-k]').forEach(el=>{const k=el.dataset.k,v=S[k]; if(v===undefined)return;
+    if(el.type==='checkbox')el.checked=!!v;
+    else if(el.type==='range'){el.value=v;el.style.setProperty('--p',((v-el.min)/(el.max-el.min)*100)+'%')}
+    else if(el.classList.contains('seg')||el.classList.contains('corners'))$$('button',el).forEach(b=>b.classList.toggle('on',b.dataset.v===String(v)));});
+  $$('[data-o]').forEach(el=>el.textContent=S[el.dataset.o]+'%');
+  $('#autostart').checked=!!ENV.autostart;
+  renderHotkey(); preview();
+}
+$$('input[type=checkbox][data-k]').forEach(el=>el.onchange=()=>setKey(el.dataset.k,el.checked));
+$$('input[type=range][data-k]').forEach(el=>el.oninput=()=>setKey(el.dataset.k,+el.value));
+$$('.seg button,.corners button').forEach(b=>b.onclick=()=>{const g=b.parentElement.dataset.k;
+  setKey(g,g==='fahrenheit'?b.dataset.v==='true':b.dataset.v)});
+$('#autostart').onchange=e=>post('autostart:'+(e.target.checked?'on':'off'));
+
+/* atalho */
+function renderHotkey(){const b=$('#hk'); if(b.classList.contains('rec'))return;
+  b.innerHTML=(S.hotkey||'').split('+').map(p=>'<kbd>'+p+'</kbd>').join('<span style="color:var(--muted)">+</span>')}
+const KEYS={Insert:'Insert',Delete:'Delete',Home:'Home',End:'End',PageUp:'PageUp',PageDown:'PageDown',Pause:'Pause',ScrollLock:'ScrollLock',Space:'Space'};
+function keyName(e){const c=e.code; if(/^Key[A-Z]$/.test(c))return c[3]; if(/^Digit\d$/.test(c))return c[5];
+  if(/^F\d{1,2}$/.test(c))return c; if(/^Numpad\d$/.test(c))return 'Num'+c[6]; return KEYS[c]||null}
+$('#hk').onclick=()=>{const b=$('#hk');b.classList.add('rec');b.textContent='Pressione o atalho…  (Esc cancela)';$('#hkErr').textContent='';
+  const stop=()=>{b.classList.remove('rec');document.removeEventListener('keydown',on,true);renderHotkey()};
+  const on=e=>{e.preventDefault();e.stopPropagation();
+    if(e.key==='Escape')return stop();
+    if(['Control','Shift','Alt','Meta'].includes(e.key))return;
+    const k=keyName(e); if(!k){$('#hkErr').textContent='Essa tecla não é suportada.';return stop()}
+    const m=[e.ctrlKey&&'Ctrl',e.altKey&&'Alt',e.shiftKey&&'Shift',e.metaKey&&'Win'].filter(Boolean);
+    if(!m.length){$('#hkErr').textContent='Inclua Ctrl, Alt, Shift ou Win, para não roubar uma tecla do jogo.';return stop()}
+    S.hotkey=[...m,k].join('+');post('set:hotkey='+S.hotkey);stop()};
+  document.addEventListener('keydown',on,true)};
+
+/* ícones de periféricos (mesmo desenho do app: traço fino) */
+const IC={
+  mouse:'<svg width="12" height="16" viewBox="0 0 11 14" fill="none" stroke="#b4b9cb" stroke-width="1.3" stroke-linecap="round"><rect x=".65" y=".65" width="9.7" height="12.7" rx="4.85"/><path d="M5.5 2.6v2.6M1.3 6.4h8.4"/></svg>',
+  headset:'<svg width="18" height="16" viewBox="0 0 16 14" fill="none" stroke="#b4b9cb" stroke-width="1.3" stroke-linecap="round"><path d="M2 9V8a6 6 0 0 1 12 0v1"/><rect x="1" y="8.5" width="3" height="5" rx="1.2" fill="#b4b9cb"/><rect x="12" y="8.5" width="3" height="5" rx="1.2" fill="#b4b9cb"/></svg>'
+};
+
+/* pré-visualização do painel */
+function preview(){
+  const pv=$('#pv'),st=$('#stage'),sc=(S.overlay_scale||100)/100*0.5,mg=14;
+  const fh=S.fahrenheit,T=c=>fh?Math.round(c*9/5+32):c,U=fh?'°F':'°C';
+  const g=[['TEMP',T(71),U,'#ffc24d'],['POWER',156,'W'],['VRAM','5.2','GB'],['CORE','2.61','GHz']];
+  const cell=c=>`<div><small>${c[0]}</small><span style="${c[3]?'color:'+c[3]:''}">${c[1]}<em>${c[2]}</em></span></div>`;
+  let h=`<div class="hero"><div><span class="big">95</span><span class="u">FPS</span></div><div class="m"><b>10.5</b> ms</div></div>`;
+  if(S.panel_graph!==false)h+=`<svg class="sp" viewBox="0 0 232 34" preserveAspectRatio="none"><defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#5be584" stop-opacity=".28"/><stop offset="1" stop-color="#5be584" stop-opacity="0"/></linearGradient></defs><path d="M0 22 L20 18 L40 21 L62 12 L84 16 L106 9 L128 15 L150 11 L172 17 L194 8 L216 13 L232 10 L232 34 L0 34Z" fill="url(#sg)"/><path d="M0 22 L20 18 L40 21 L62 12 L84 16 L106 9 L128 15 L150 11 L172 17 L194 8 L216 13 L232 10" fill="none" stroke="#5be584" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+  if(S.panel_gpu!==false)h+=`<div class="sec"><div class="hd"><span><i style="background:#7ed957"></i>RTX 5060</span><span>96<small style="color:#8e93a6;font-size:12px;font-weight:500"> %</small></span></div><div class="bar"><b style="width:96%;background:#7ed957"></b></div><div class="g">${g.map(cell).join('')}</div></div>`;
+  if(S.panel_cpu!==false)h+=`<div class="sec"><div class="hd"><span><i style="background:#5aa9ff"></i>i5-12400F</span><span>34<small style="color:#8e93a6;font-size:12px;font-weight:500"> %</small></span></div><div class="bar"><b style="width:34%;background:#5aa9ff"></b></div><div class="g">${cell(['TEMP',T(58),U,'#7fe3a0'])}${cell(['RAM','12.2','GB'])}</div></div>`;
+  if(S.panel_devices!==false)h+=`<div class="sec"><div class="hd"><span><i style="background:#b28cff"></i>Periféricos</span></div><div class="g" style="margin-top:12px">${cell([IC.mouse,82,'%','#5be584'])}${cell([IC.headset,18,'%','#ffc24d'])}</div></div>`;
+  pv.innerHTML=h;
+  pv.style.opacity=Math.max(.35,(S.overlay_opacity||90)/100);
+  pv.style.transform=`scale(${sc})`;
+  const w=268*sc,hh=pv.offsetHeight*sc,sw=st.clientWidth,sh=st.clientHeight,c=S.overlay_corner||'top-left';
+  pv.style.left=(c.endsWith('left')?mg:sw-w-mg)+'px';
+  pv.style.top=(c.startsWith('top')?mg:sh-hh-mg)+'px';
+}
+addEventListener('resize',preview);
+
+/* atualização */
+let checked=false,NEW=null;
+const ICON={ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',new:'<path d="M12 4v10m0 0-4-4m4 4 4-4M5 19h14"/>',err:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01"/>',spin:'<path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/>'};
+function ustate(kind,title,sub){const b=$('#ubadge');b.className='badge '+(kind==='spin'?'':kind);$('#uicon').innerHTML=ICON[kind]||ICON.spin;
+  $('#utitle').innerHTML=title;$('#usub').textContent=sub}
+const vnum=v=>v.replace(/^v/,'').split('.').map(n=>parseInt(n)||0);
+const newer=(a,b)=>{const x=vnum(a),y=vnum(b);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return(x[i]||0)>(y[i]||0)}return false};
+async function checkUpdate(){
+  checked=true;$('#ucheck').disabled=true;$('#uinstall').style.display='none';$('#unotes').style.display='none';
+  ustate('spin','Procurando…','Consultando as versões publicadas.');
+  if(!ENV.repo){ustate('err','Atualizações indisponíveis','O endereço do repositório de versões ainda não foi configurado nesta compilação.');$('#ucheck').disabled=false;return}
+  try{
+    const r=await fetch('https://api.github.com/repos/'+ENV.repo+'/releases/latest',{headers:{Accept:'application/vnd.github+json'}});
+    if(r.status===404)throw new Error('Nenhuma versão publicada ainda.');
+    if(!r.ok)throw new Error('O GitHub respondeu '+r.status+'.');
+    const rel=await r.json(), tag=rel.tag_name||'';
+    if(!newer(tag,ENV.version)){ustate('ok','Você está na versão mais recente','Versão '+ENV.version+' — nada a atualizar.');return}
+    const asset=(rel.assets||[]).find(a=>/^SensoryxSetup-.*\.exe$/i.test(a.name));
+    if(!asset)throw new Error('A versão '+tag+' não tem instalador publicado.');
+    let sha=(asset.digest||'').replace(/^sha256:/,'');
+    if(!sha){const s=(rel.assets||[]).find(a=>/^SHA256SUMS/i.test(a.name));
+      if(s){const t=await (await fetch(s.browser_download_url)).text();const m=t.split('\n').find(l=>l.includes(asset.name));if(m)sha=m.trim().split(/\s+/)[0]}}
+    if(!/^[0-9a-f]{64}$/i.test(sha))throw new Error('A versão '+tag+' não traz o hash SHA-256 para verificação. Por segurança, não vou baixar.');
+    NEW={url:asset.browser_download_url,sha256:sha.toLowerCase(),size:asset.size,name:asset.name};
+    ustate('new','Nova versão disponível: '+tag.replace(/^v/,''),'Você tem a '+ENV.version+'. O download é verificado por SHA-256 antes de instalar.');
+    if(rel.body){$('#unotes').textContent=rel.body;$('#unotes').style.display='block'}
+    $('#uinstall').style.display='';
+  }catch(e){ustate('err','Não foi possível verificar',String(e.message||e))}
+  finally{$('#ucheck').disabled=false}
+}
+$('#ucheck').onclick=checkUpdate;
+$('#uinstall').onclick=()=>{if(!NEW)return;$('#uinstall').disabled=true;$('#ucheck').disabled=true;$('#uprog').style.display='block';
+  ustate('spin','Baixando…','Não feche esta janela.');post('update:install|'+NEW.url+'|'+NEW.sha256+'|'+NEW.size)};
+
+/* chamadas vindas do Rust */
+window.sensoryx={
+  init(s,env){S=s;ENV=Object.assign(ENV,env);$$('.cv').forEach(e=>e.textContent=ENV.version);$('#verSide').textContent='v'+ENV.version;sync()},
+  autostart(on){ENV.autostart=on;$('#autostart').checked=on},
+  progress(p){$('#uprog b').style.width=p+'%';$('#usub').textContent='Baixando… '+p+'%'},
+  verifying(){ustate('spin','Verificando…','Conferindo o SHA-256 do arquivo baixado.')},
+  installing(){ustate('ok','Instalando…','O Sensoryx vai fechar e reabrir sozinho.')},
+  failed(msg){$('#uprog').style.display='none';$('#uinstall').disabled=false;$('#ucheck').disabled=false;ustate('err','A atualização falhou',msg)}
+};
+post('ready');
+</script>
+</body>
+</html>
